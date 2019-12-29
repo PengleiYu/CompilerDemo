@@ -10,6 +10,9 @@ import java.util.List;
 
 /**
  * 一个简单的手写的词法分析器
+ * <p>
+ * 1，解析比较语句：a，定义各种状态，b，定义token初始化方法，c，定义状态机流转逻辑
+ * 2, 解析赋值操作：a，需要解析关键字int，添加id_int*中间状态，b，添加赋值状态
  */
 public class SimpleLexer {
     public static void main(String[] args) {
@@ -19,12 +22,8 @@ public class SimpleLexer {
 
         SimpleLexer lexer = new SimpleLexer();
 
-        lexer.tokenize(s1);
+        lexer.tokenize(s2);
         dumpTokens(lexer.tokens);
-        //        lexer.tokenize(s2);
-        //        dumpTokens(lexer.tokens);
-        //        lexer.tokenize(s3);
-        //        dumpTokens(lexer.tokens);
     }
 
     private static void dumpTokens(List<Token> tokens) {
@@ -64,6 +63,37 @@ public class SimpleLexer {
                             state = initToken(ch);
                         }
                         break;
+                    case Id_int1:
+                        if (ch == 'n') {//n进入int的下一步
+                            state = DfaState.Id_int2;
+                            tokenText.append(ch);
+                        } else if (isAlpha(ch) || isDigit(ch)) {//非n字符则进入id状态
+                            state = DfaState.Id;
+                            tokenText.append(ch);
+                        } else {
+                            state = initToken(ch);
+                        }
+                        break;
+                    case Id_int2:
+                        if (ch == 't') {
+                            state = DfaState.Id_int3;
+                            tokenText.append(ch);
+                        } else if (isAlpha(ch) || isDigit(ch)) {//非t字符则进入id状态
+                            state = DfaState.Id;
+                            tokenText.append(ch);
+                        } else {
+                            state = initToken(ch);
+                        }
+                        break;
+                    case Id_int3:
+                        if (isBland(ch)) {//int后跟空白字符，说明是int关键字
+                            token.tokenType = TokenType.Int;
+                            state = initToken(ch);
+                        } else {//int后跟非空白字符，说明是id
+                            state = DfaState.Id;
+                            tokenText.append(ch);
+                        }
+                        break;
                     case IntLiteral:
                         if (isDigit(ch)) {//当前是int字面值状态，又读到了数字
                             tokenText.append(ch);
@@ -82,6 +112,9 @@ public class SimpleLexer {
                         break;
                     case GE:
                         state = initToken(ch);//大于等于号状态不再接受其他字符
+                        break;
+                    case Assignment:
+                        state = initToken(ch);
                         break;
                 }
             }
@@ -106,7 +139,11 @@ public class SimpleLexer {
 
         DfaState newState = DfaState.Initial;
         if (isAlpha(ch)) {
-            newState = DfaState.Id;
+            if (ch == 'i') {
+                newState = DfaState.Id_int1;
+            } else {
+                newState = DfaState.Id;
+            }
             token.tokenType = TokenType.Identifier;
             tokenText.append(ch);
         } else if (isDigit(ch)) {
@@ -116,6 +153,10 @@ public class SimpleLexer {
         } else if (ch == '>') {
             newState = DfaState.GT;
             token.tokenType = TokenType.GT;
+            tokenText.append(ch);
+        } else if (ch == '=') {
+            newState = DfaState.Assignment;
+            token.tokenType = TokenType.Assignment;
             tokenText.append(ch);
         }
         return newState;
@@ -135,7 +176,7 @@ public class SimpleLexer {
 
 
     private enum DfaState {
-        Initial, Id, Id_int1, Id_int2, Id_int3, IntLiteral, GT, GE
+        Initial, Id, Id_int1, Id_int2, Id_int3, IntLiteral, GT, GE, Assignment
     }
 
     private static class SimpleToken implements Token {

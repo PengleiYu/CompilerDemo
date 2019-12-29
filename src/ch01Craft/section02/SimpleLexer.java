@@ -12,7 +12,8 @@ import java.util.List;
  * 一个简单的手写的词法分析器
  * <p>
  * 1，解析比较语句：a，定义各种状态，b，定义token初始化方法，c，定义状态机流转逻辑
- * 2, 解析赋值操作：a，需要解析关键字int，添加id_int*中间状态，b，添加赋值状态
+ * 2, 解析赋值操作：a，需要解析关键字int，添加id_int*中间state，b，添加赋值状态
+ * 3，解析算术表达式：添加加减乘除的state和type
  */
 public class SimpleLexer {
     public static void main(String[] args) {
@@ -22,7 +23,7 @@ public class SimpleLexer {
 
         SimpleLexer lexer = new SimpleLexer();
 
-        lexer.tokenize(s2);
+        lexer.tokenize(s3);
         dumpTokens(lexer.tokens);
     }
 
@@ -111,10 +112,12 @@ public class SimpleLexer {
                         }
                         break;
                     case GE:
-                        state = initToken(ch);//大于等于号状态不再接受其他字符
-                        break;
                     case Assignment:
-                        state = initToken(ch);
+                    case Plus:
+                    case Minus:
+                    case Star:
+                    case Slash:
+                        state = initToken(ch);//退出当前状态并保存token
                         break;
                 }
             }
@@ -150,14 +153,39 @@ public class SimpleLexer {
             newState = DfaState.IntLiteral;
             token.tokenType = TokenType.IntLiteral;
             tokenText.append(ch);
-        } else if (ch == '>') {
-            newState = DfaState.GT;
-            token.tokenType = TokenType.GT;
-            tokenText.append(ch);
-        } else if (ch == '=') {
-            newState = DfaState.Assignment;
-            token.tokenType = TokenType.Assignment;
-            tokenText.append(ch);
+        } else {
+            switch (ch) {
+                case '>':
+                    newState = DfaState.GT;
+                    token.tokenType = TokenType.GT;
+                    tokenText.append(ch);
+                    break;
+                case '=':
+                    newState = DfaState.Assignment;
+                    token.tokenType = TokenType.Assignment;
+                    tokenText.append(ch);
+                    break;
+                case '+':
+                    newState = DfaState.Plus;
+                    token.tokenType = TokenType.Plus;
+                    tokenText.append(ch);
+                    break;
+                case '-':
+                    newState = DfaState.Minus;
+                    token.tokenType = TokenType.Minus;
+                    tokenText.append(ch);
+                    break;
+                case '*':
+                    newState = DfaState.Star;
+                    token.tokenType = TokenType.Star;
+                    tokenText.append(ch);
+                    break;
+                case '/':
+                    newState = DfaState.Slash;
+                    token.tokenType = TokenType.Slash;
+                    tokenText.append(ch);
+                    break;
+            }
         }
         return newState;
     }
@@ -176,7 +204,12 @@ public class SimpleLexer {
 
 
     private enum DfaState {
-        Initial, Id, Id_int1, Id_int2, Id_int3, IntLiteral, GT, GE, Assignment
+        Initial, IntLiteral,
+        Id, Id_int1, Id_int2, Id_int3,
+        GT, GE,
+        Assignment,
+        Plus, Minus,
+        Star, Slash,
     }
 
     private static class SimpleToken implements Token {

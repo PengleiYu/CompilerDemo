@@ -21,10 +21,10 @@ public class SimpleLexer {
 
         lexer.tokenize(s1);
         dumpTokens(lexer.tokens);
-//        lexer.tokenize(s2);
-//        dumpTokens(lexer.tokens);
-//        lexer.tokenize(s3);
-//        dumpTokens(lexer.tokens);
+        //        lexer.tokenize(s2);
+        //        dumpTokens(lexer.tokens);
+        //        lexer.tokenize(s3);
+        //        dumpTokens(lexer.tokens);
     }
 
     private static void dumpTokens(List<Token> tokens) {
@@ -40,6 +40,7 @@ public class SimpleLexer {
 
     /**
      * 状态机，根据当前所处的状态和读到的字符决定下一步走向
+     *
      * @param code 代码字符串
      */
     private void tokenize(String code) {
@@ -134,7 +135,7 @@ public class SimpleLexer {
 
 
     private enum DfaState {
-        Initial, Id, IntLiteral, GT, GE
+        Initial, Id, Id_int1, Id_int2, Id_int3, IntLiteral, GT, GE
     }
 
     private static class SimpleToken implements Token {

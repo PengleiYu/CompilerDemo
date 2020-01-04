@@ -17,35 +17,30 @@ public class SimpleCalculator {
         SimpleASTNode node = null;
         Token token = reader.peek();
         if (token.getType() == TokenType.Int) {
-            token = reader.read();
-            SimpleASTNode intNode = new SimpleASTNode(ASTNodeType.IntDeclaration, token.getText());
-            node = intNode;
+            reader.read();
             token = reader.peek();
             if (token.getType() == TokenType.Identifier) {
                 token = reader.read();
-                SimpleASTNode identifierNode = new SimpleASTNode(ASTNodeType.Identifier, token.getText());
-                intNode.addChild(identifierNode);
+                node = new SimpleASTNode(ASTNodeType.IntDeclaration, token.getText());
                 token = reader.peek();
                 if (token.getType() == TokenType.Assignment) {
-                    token=reader.read();
-                    SimpleASTNode assignmentNode=new SimpleASTNode(ASTNodeType.AssignmentStmt,token.getText());
-                    identifierNode.addChild(assignmentNode);
+                    reader.read();
                     SimpleASTNode child = additive(reader);
                     if (child != null) {
-                        assignmentNode.addChild(child);
+                        node.addChild(child);
                     } else {
                         throw new Exception("非法的初始化，需要一个表达式");
                     }
                 }
 
             }
-        }
-        if (node != null) {
-            token = reader.peek();
-            if (token != null && token.getType() == TokenType.Semicolon) {
-                reader.read();
-            } else {
-                throw new Exception("非法表达式，需要分号");
+            if (node != null) {
+                token = reader.peek();
+                if (token != null && token.getType() == TokenType.Semicolon) {
+                    reader.read();
+                } else {
+                    throw new Exception("非法表达式，需要分号");
+                }
             }
         }
         return node;

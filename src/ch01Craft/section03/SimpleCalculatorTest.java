@@ -12,16 +12,20 @@ import org.junit.Test;
 public class SimpleCalculatorTest {
     @Test
     public void intDeclare() throws Exception {
-        String s1 = "int age = 40;";
-        String s2="int age = 1 + 4 * 4;";
-
+        String[] decalares = {
+                "int age ;",
+                "int age = 30 ;",
+                "int age = 1 + 4 * 4;",
+        };
 
         SimpleLexer lexer = new SimpleLexer();
         SimpleCalculator calculator = new SimpleCalculator();
-        TokenReader reader = lexer.tokenize(s1);
-        ASTNode node = calculator.intDeclare(reader);
-
-        calculator.dumpAST(node, "");
+        for (String declare : decalares) {
+            TokenReader reader = lexer.tokenize(declare);
+            ASTNode node = calculator.intDeclare(reader);
+            calculator.dumpAST(node, "");
+            System.out.println("=============================================");
+        }
     }
 
     @org.junit.Test

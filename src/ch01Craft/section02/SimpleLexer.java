@@ -29,7 +29,7 @@ public class SimpleLexer {
     }
 
     private static void dumpTokens(TokenReader tokenReader) {
-        while (tokenReader.peek()!=null){
+        while (tokenReader.peek() != null) {
             Token token = tokenReader.read();
             System.out.println(token.getText() + "\t\t" + token.getType());
         }
@@ -44,7 +44,7 @@ public class SimpleLexer {
      *
      * @param code 代码字符串
      */
-    private TokenReader tokenize(String code) {
+    public TokenReader tokenize(String code) {
         tokens = new ArrayList<>();
         tokenText = new StringBuffer();
         token = new SimpleToken();
@@ -118,6 +118,9 @@ public class SimpleLexer {
                     case Minus:
                     case Star:
                     case Slash:
+                    case Semicolon:
+                    case LeftParen:
+                    case RightParen:
                         state = initToken(ch);//退出当前状态并保存token
                         break;
                 }
@@ -187,6 +190,21 @@ public class SimpleLexer {
                     token.tokenType = TokenType.Slash;
                     tokenText.append(ch);
                     break;
+                case '(':
+                    newState=DfaState.LeftParen;
+                    token.tokenType=TokenType.LeftParen;
+                    tokenText.append(ch);
+                    break;
+                case ')':
+                    newState=DfaState.RightParen;
+                    token.tokenType=TokenType.RightParen;
+                    tokenText.append(ch);
+                    break;
+                case ';':
+                    newState=DfaState.Semicolon;
+                    token.tokenType=TokenType.Semicolon;
+                    tokenText.append(ch);
+                    break;
             }
         }
         return newState;
@@ -212,6 +230,10 @@ public class SimpleLexer {
         Assignment,
         Plus, Minus,
         Star, Slash,
+
+        Semicolon,//分号
+        LeftParen,
+        RightParen,
     }
 
     private static class SimpleToken implements Token {

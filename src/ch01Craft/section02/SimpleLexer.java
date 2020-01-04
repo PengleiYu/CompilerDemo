@@ -1,6 +1,7 @@
 package ch01Craft.section02;
 
 import ch01Craft.Token;
+import ch01Craft.TokenReader;
 import ch01Craft.TokenType;
 
 import java.io.CharArrayReader;
@@ -23,15 +24,15 @@ public class SimpleLexer {
 
         SimpleLexer lexer = new SimpleLexer();
 
-        lexer.tokenize(s3);
-        dumpTokens(lexer.tokens);
+        TokenReader tokenReader = lexer.tokenize(s3);
+        dumpTokens(tokenReader);
     }
 
-    private static void dumpTokens(List<Token> tokens) {
-        for (Token token : tokens) {
+    private static void dumpTokens(TokenReader tokenReader) {
+        while (tokenReader.peek()!=null){
+            Token token = tokenReader.read();
             System.out.println(token.getText() + "\t\t" + token.getType());
         }
-
     }
 
     private StringBuffer tokenText = new StringBuffer();
@@ -43,7 +44,7 @@ public class SimpleLexer {
      *
      * @param code 代码字符串
      */
-    private void tokenize(String code) {
+    private TokenReader tokenize(String code) {
         tokens = new ArrayList<>();
         tokenText = new StringBuffer();
         token = new SimpleToken();
@@ -128,6 +129,7 @@ public class SimpleLexer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return new SimpleTokenReader(tokens);
     }
 
     private DfaState initToken(char ch) {
@@ -229,6 +231,51 @@ public class SimpleLexer {
         @Override
         public String toString() {
             return tokenType + " : " + text;
+        }
+    }
+
+    private static class SimpleTokenReader implements TokenReader {
+        private final List<Token> tokens;
+        private int position;
+
+        private SimpleTokenReader(List<Token> tokens) {
+            this.tokens = tokens;
+            position = 0;
+        }
+
+        @Override
+        public Token read() {
+            if (position < tokens.size()) {
+                return tokens.get(position++);
+            }
+            return null;
+        }
+
+        @Override
+        public Token peek() {
+            if (position < tokens.size()) {
+                return tokens.get(position);
+            }
+            return null;
+        }
+
+        @Override
+        public void unread() {
+            if (position > 0) {
+                position--;
+            }
+        }
+
+        @Override
+        public int getPosition() {
+            return position;
+        }
+
+        @Override
+        public void setPosition(int position) {
+            if (0 <= position && position < tokens.size()) {
+                this.position = position;
+            }
         }
     }
 }
